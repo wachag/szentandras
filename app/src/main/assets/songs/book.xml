@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet href="stylesheets/book.xsl" type="text/xsl"?>
+<book
+ xmlns="http://openlyrics.info/namespace/2009/song"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+ chordnotation="hungarian"
+ xml:lang="hu">
+  <title id="tk">Teszt könyv</title>
+  <foreword>Ez egy énekekeskönyv, amelynek a neve „Teszt könyv”.</foreword>
+  <toc>Tartalomjegyzék</toc>
+  <xi:include href="A béke napja közel.xml" parse="xml" />
+  <xi:include href="Add a kezed, hogy zengjünk az.xml" parse="xml" />
+  <xi:include href="Alleluja, dicsőség a mennyben Istenenünknek.xml" parse="xml" />
+  <xi:include href="Habár szemem (Majoros Ildikó, Jesus Adrian Romer, Marcela Gandara, Gyuris Gellért).xml" parse="xml" />
+  <xi:include href="How Great Is Our God (Chris Tomlin, Ed Cash, Jesse Reeves).xml" parse="xml" />
+  <xi:include href="Jézus, véred megtisztít (Michael Christ, Harkai Tamás).xml" parse="xml" />
+  <xi:include href="Legyen a béke teveled, legyen.xml" parse="xml" />
+  <xi:include href="Meghívtál, hogy vízre lépjek (Joel Houston, Matt Crocker, Salomon Lighthelm, Csiszér László, Sidó Éva).xml" parse="xml" />
+  <xi:include href="Új szívet adok és új lelket.xml" parse="xml" />
+  <xi:include href="You Are My Passion (Noel Richards, Tricia Richards).xml" parse="xml" />
+</book>
