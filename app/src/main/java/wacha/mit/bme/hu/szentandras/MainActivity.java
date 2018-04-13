@@ -39,61 +39,7 @@ public class MainActivity extends AppCompatActivity {
     SwitchCompat distribSwitch;
     SwitchCompat masterSwitch;
     List<String> files;
-    ServerSocket serverSocket;
-    NsdManager.RegistrationListener registrationListener;
-    String mServiceName;
-    NsdManager nsdManager;
-
-    private void startService(){
-        try {
-            NsdServiceInfo serviceInfo = new NsdServiceInfo();
-            serverSocket=new ServerSocket(0);
-            serviceInfo.setServiceName("SzentAndras");
-            serviceInfo.setServiceType("_szentandras._tcp");
-            serviceInfo.setPort(serverSocket.getLocalPort());
-            registrationListener = new NsdManager.RegistrationListener(){
-                @Override
-                public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
-                    // Save the service name. Android may have changed it in order to
-                    // resolve a conflict, so update the name you initially requested
-                    // with the name Android actually used.
-                    mServiceName = NsdServiceInfo.getServiceName();
-                }
-
-                @Override
-                public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                    // Registration failed! Put debugging code here to determine why.
-                }
-
-                @Override
-                public void onServiceUnregistered(NsdServiceInfo arg0) {
-                    // Service has been unregistered. This only happens when you call
-                    // NsdManager.unregisterService() and pass in this listener.
-                }
-
-                @Override
-                public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                    // Unregistration failed. Put debugging code here to determine why.
-                }
-            };
-            nsdManager = (NsdManager)getBaseContext().getSystemService(Context.NSD_SERVICE);
-
-            nsdManager.registerService(
-                    serviceInfo, NsdManager.PROTOCOL_DNS_SD, registrationListener);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Starting service");
-    }
-    private void stopService() {
-        try {
-            System.out.println("Stopping service");
-            serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        nsdManager.unregisterService(registrationListener);
-    }
+    ServiceHelper serviceHelper;
 
 
     private String getSongTitle(InputStream source){
@@ -133,7 +79,11 @@ public class MainActivity extends AppCompatActivity {
         int i=1;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        try {
+            serviceHelper=new ServiceHelper();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         webView = (WebView)findViewById(R.id.WebView);
         navView=(NavigationView)findViewById(R.id.nav_view);
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -175,10 +125,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){
                     if(masterSwitch.isChecked()){
-
-                        startService();
+                        serviceHelper.startService(getBaseContext());
                     }else{
-                        stopService();
+                        serviceHelper.stopService();
                     }
                 }
                 masterSwitch.setEnabled(!b);
@@ -189,9 +138,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     protected void onPause() {
-        if(masterSwitch.isChecked() && distribSwitch.isChecked()) {
-            stopService();
-        }
+        serviceHelper.stopService();
         super.onPause();
     }
 
@@ -199,13 +146,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if(masterSwitch.isChecked() && distribSwitch.isChecked()) {
-            startService();
+            serviceHelper.startService(getBaseContext());
         }
     }
 
     @Override
     protected void onDestroy() {
-        stopService();
+        serviceHelper.stopService();
         super.onDestroy();
     }
 
