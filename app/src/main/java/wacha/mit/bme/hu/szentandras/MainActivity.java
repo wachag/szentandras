@@ -96,7 +96,23 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.master_switch:
                         masterSwitch.toggle();
                         break;
-                    default: webView.loadUrl("file:///android_asset/songs/" + files.get(item.getItemId()-1));
+                    default: {
+                            final int id=item.getItemId() - 1;
+                            webView.loadUrl("file:///android_asset/songs/" + files.get(id));
+                            Thread t=new Thread(){
+                                @Override
+                                public void run() {
+                                    if(masterSwitch.isChecked() && distribSwitch.isChecked()){
+                                        try {
+                                            serviceHelper.sendString(getSongTitle(getAssets().open("songs/" +files.get(id))));
+                                        } catch (IOException e) {
+                                            serviceHelper.sendString("");
+                                        }
+                                    }
+                                }
+                            };
+                            t.start();
+                        }
                 }
                 return true;
             }
@@ -125,8 +141,14 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){
                     if(masterSwitch.isChecked()){
-                        serviceHelper.startService(getBaseContext());
-                    }else{
+                        try {
+                            serviceHelper.startService(getBaseContext());
+                        }catch (IOException e){
+
+                        }
+                    }
+                }else{
+                    if(masterSwitch.isChecked()) {
                         serviceHelper.stopService();
                     }
                 }
@@ -138,16 +160,20 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     protected void onPause() {
-        serviceHelper.stopService();
+//        serviceHelper.stopService();
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(masterSwitch.isChecked() && distribSwitch.isChecked()) {
+  /*      if(masterSwitch.isChecked() && distribSwitch.isChecked()) {
+            try{
             serviceHelper.startService(getBaseContext());
-        }
+            }catch (IOException e){
+
+            }
+        }*/
     }
 
     @Override

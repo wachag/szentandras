@@ -7,6 +7,7 @@ import android.net.nsd.NsdServiceInfo;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ServiceHelper {
@@ -15,18 +16,21 @@ public class ServiceHelper {
     NsdManager.RegistrationListener registrationListener;
     String mServiceName;
     NsdManager nsdManager;
-    public ServiceHelper() throws IOException {
-        serverSocket=new ServerSocket(0);
+    ServerThread server;
+    public ServiceHelper()  throws IOException{
         started=false;
+        serverSocket=new ServerSocket(0);
 
     }
-    public void startService(Context context){
+    public synchronized void startService(Context context)throws IOException{
         if(!started) {
+            server=new ServerThread(serverSocket);
+            server.start();
             started=true;
             NsdServiceInfo serviceInfo = new NsdServiceInfo();
             serviceInfo.setServiceName("SzentAndras");
             serviceInfo.setServiceType("_szentandras._tcp");
-            serviceInfo.setPort(serverSocket.getLocalPort());
+            serviceInfo.setPort(server.getPort());
             registrationListener = new NsdManager.RegistrationListener() {
                 @Override
                 public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
@@ -59,14 +63,34 @@ public class ServiceHelper {
             System.out.println("Starting service");
         }
     }
+    public synchronized void sendString(String msg){
+        if(started){
+            server.sendString(msg);
+        }
+    }
 
-
-    public void stopService() {
+    public synchronized void stopService() {
         if(started) {
             System.out.println("Stopping service");
 
             nsdManager.unregisterService(registrationListener);
+            server.interrupt();
+            Thread bg=new Thread(){
+                @Override
+                public void run() {
+                    try {
+                        Socket poison=new Socket();
+                        poison.connect(serverSocket.getLocalSocketAddress());
+                        poison.close();
+                    }catch (IOException e) {
+                    }
+
+                }
+            };
+            bg.start();
+
         }
+
         started=false;
     }
 }
